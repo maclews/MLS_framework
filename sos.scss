@@ -1,0 +1,68 @@
+@charset "UTF-8";
+
+/* Variables to use in Bootstrap import */
+$font-family-sans-serif: 'IBM Plex Sans';
+$font-family-monospace: 'IBM Plex Mono';
+$font-family-serif: 'IBM Plex Serif';
+$font-family-condensed: 'IBM Plex Sans Condensed';
+
+/* Bootstrap Import */
+@import 'node_modules/bootstrap/scss/bootstrap.scss';
+
+/* Additional classes added after import */
+.font-serif {
+  font-family: 'IBM Plex Serif' !important;
+}
+.font-condensed {
+  font-family: 'IBM Plex Sans Condensed' !important;
+}
+
+#sidebarMenu {
+  min-width: 240px;
+}
+
+#sidebarMenu.show,
+#sidebarMenu.collapsing {
+  width: 100vw;
+}
+
+#sidemenu a,
+#sidemenu .btn-link {
+  text-decoration: none !important;
+}
+
+#sidemenu li a.nav-link:hover {
+  background: rgba($primary, 0.25);
+}
+
+#sidemenu ul {
+  padding-inline-start: 0px;
+  margin-block-start: 0px;
+  margin-block-end: 0px;
+}
+
+#sidemenu button.collapsed .open,
+#sidemenu button .closed {
+  display: none;
+}
+#sidemenu button .open,
+#sidemenu button.collapsed .closed {
+  display: inline-block;
+  margin-left: auto;
+}
+
+#sidemenu button {
+  box-shadow: none !important;
+}
+
+#sidemenu .card-body {
+  padding: 0;
+}
+
+#sidemenu a.nav-link {
+  padding: 1rem 2rem;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+#sidemenu li:last-child a.nav-link {
+  border-bottom: none;
+}

@@ -1,0 +1,7 @@
+*.ffs_db
+root/php/menu.txt
+root/static/css/*
+root/static/js/*
+root/dbc.ini
+root/php/menu.html
+root/php/sos.html
