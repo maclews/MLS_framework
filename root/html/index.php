@@ -119,13 +119,13 @@ if (!defined("SKIP_CONTENT")) {
   if (isset($index['license'])) {
     Gstatic::app()->register_link_tag('license',$index['license']);
   }
-  foreach ($index['reg_css'] as $rcss) {
+  if (isset($index['reg_css'])) foreach ($index['reg_css'] as $rcss) {
     Gstatic::app()->register_css($rcss);
   }
-  foreach ($index['reg_js'] as $js) {
+  if (isset($index['reg_js'])) foreach ($index['reg_js'] as $js) {
     Gstatic::app()->register_js($js);
   }
-  foreach ($index['reg_font'] as $rfont) {
+  if (isset($index['reg_font'])) foreach ($index['reg_font'] as $rfont) {
     $rf = explode('|', $rfont);
     if (!isset($rf[3])) $rf[3] = false;
     Gstatic::app()->register_font($rf[0],$rf[1],$rf[2],(bool)$rf[3]);
@@ -144,7 +144,7 @@ if (!defined("SKIP_CONTENT")) {
     Gstatic::app()->register_ext_css($rec[0],$rec[1],(bool)$rec[2]);
   }
 
-  require PHP . 'footer.inc.php';
+  if (file_exists(PHP . 'footer.inc.php')) require PHP . 'footer.inc.php';
 
   # PROCESS HTML AND CONTENT
   Gstatic::app()->compileHTML();
