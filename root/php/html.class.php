@@ -131,16 +131,40 @@ class Html {
     $tag = $this->dom->createElement($a[0], $a[1]);
     $attr = null;
     for ($i = 2; $i < $n; $i++) {
-      if ($i%2 == 1) {
+      if ($i%2 == 0) {
         $attr = $this->dom->createAttribute($a[$i]);
       } else {
-        if ($a[$i] !== null && $a[$i] !== false)
-          $attr->value = $a[$i];
+        if ($a[$i] !== null && $a[$i] !== false) $attr->value = $a[$i];
         $tag->appendChild($attr);
         $attr = null;
       }
     }
     array_push($this->bottomBodyTags, $tag);
+  }
+  /**
+   * Add tag to Element with id
+   * Accepts one array as parameter.
+   * [0] - parent id
+   * [1] - tag name
+   * [2] - content (inside tag)
+   * [3 (+2)] - attribute name
+   * [4 (+2)] - attribute value
+   */
+  public function insertIntoById($a) {
+    $n = count($a);
+    $parent = $this->dom->getElementById($a[0]);
+    $tag = $this->dom->createElement($a[1], $a[2]);
+    $attr = null;
+    for ($i = 3; $i < $n; $i++) {
+      if ($i%2 == 1) {
+        $attr = $this->dom->createAttribute($a[$i]);
+      } else {
+        if ($a[$i] !== null && $a[$i] !== false) $attr->value = $a[$i];
+        $tag->appendChild($attr);
+        $attr = null;
+      }
+    }
+    $parent->appendChild($tag);
   }
   public function putModuleContent($content) {
     $parent = $this->dom->getElementById('moduleContent');
@@ -152,10 +176,10 @@ class Html {
       $parent->appendChild($node);
     }
   }
-  public function loadMenu() {
-    $parent = $this->dom->getElementById('sidebarMenu');
+  public function loadMenu($parentId, $name) {
+    $parent = $this->dom->getElementById($parentId);
     $temp = new DOMDocument();
-    $temp->loadHTML(mb_convert_encoding(file_get_contents(PHP . 'menu.html'), 'HTML-ENTITIES', 'UTF-8'));
+    $temp->loadHTML(mb_convert_encoding(file_get_contents(PHP . $name . '.html'), 'HTML-ENTITIES', 'UTF-8'));
     libxml_clear_errors();  // for HTML5 compatibility
     foreach ($temp->getElementsByTagName('body')->item(0)->childNodes as $node) {
       $node = $parent->ownerDocument->importNode($node, true);

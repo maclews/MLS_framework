@@ -3,5 +3,10 @@ root/php/menu.txt
 root/static/css/*
 root/static/js/*
 root/dbc.ini
+root/ssl.ini
 root/php/menu.html
+root/php/mls.html
 root/php/sos.html
+root/php/*.inc.php
+root/modules/home.php
+root/html/*.ico

@@ -1,0 +1,113 @@
+@charset "UTF-8";
+
+/* Variables to use in Bootstrap import */
+$font-family-sans-serif: 'Fira Sans';
+$font-family-monospace: 'Fira Mono';
+$font-family-condensed: 'Fira Sans Condensed';
+$font-family-extra-condensed: 'Fira Sans Extra Condensed';
+$primary: #511C85;
+$secondary: #84227B;
+$theme-colors: (
+  'primary': $primary,
+  'secondary': $secondary
+);
+
+/* Bootstrap Import */
+@import 'node_modules/bootstrap/scss/bootstrap.scss';
+
+/* Additional classes added after import */
+.text-condensed {
+  font-family: 'Fira Sans Condensed' !important;
+}
+.text-extra-condensed {
+  font-family: 'Fira Sans Extra Condensed' !important;
+}
+
+.dropdown-item:hover {
+  background-color: rgba($primary, 0.25) !important;
+}
+
+ul * {
+  list-style-type: none;
+}
+
+body {
+  color: #5A5A5A;
+  background-color: var(--light);
+  background-attachment: scroll;
+  background-clip: border-box;
+  background-origin: border-box;
+  background-image: linear-gradient(170deg, $primary 34.95%, transparent 35.05%),
+                    linear-gradient(220deg, $secondary 14.95%, transparent 15.05%),
+                    linear-gradient(0deg, white 25%, transparent 50%);
+  background-repeat: no-repeat;
+  background-size: 100vw 100vh;
+  background-position: center top, center top, center bottom;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+.bg-image {
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center center;
+}
+
+.carousel-caption {
+  text-shadow: 0 -2px 2px black,
+  2px -2px 2px black,
+  2px 0 2px black,
+  2px 2px 2px black,
+  0 2px 2px black,
+  -2px 2px 2px black,
+  -2px 0 2px black,
+  -2px -2px 2px black;
+}
+
+#tophead {
+  z-index: 1000;
+}
+
+.navbar-brand img {
+  height: 40px;
+}
+
+.navbar-brand span {
+  font-weight: 900;
+  color: $primary;
+}
+
+@media (min-width: 768px) {
+  .navbar-search {
+      max-width:24rem;
+  }
+
+  .borderBottomAnim:after {
+      display: block;
+      width: calc(100% + 1rem);
+      margin-left: -0.5rem;
+      content: '';
+      border-bottom: solid 3px $primary;
+      -webkit-transform: scaleX(0);
+      transform: scaleX(0);
+      -webkit-transition: -webkit-transform 150ms ease-in-out;
+      transition: -webkit-transform 150ms ease-in-out;
+      transition: transform 150ms ease-in-out;
+      transition: transform 150ms ease-in-out, -webkit-transform 150ms ease-in-out;
+      margin-bottom: -3px;
+  }
+
+  .borderBottomAnim:hover:after {
+      -webkit-transform: scaleX(1);
+      transform: scaleX(1);
+  }
+}
+
+a.borderBottomAnim {
+  -webkit-transition: color 150ms ease;
+  transition: color 150ms ease;
+}
+
+a.borderBottomAnim:hover {
+  color: $primary;
+}

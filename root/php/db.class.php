@@ -7,11 +7,13 @@ class Db {
    *                          P R I V A T E   M E T H O D S
    * --------------------------------------------------------------------------------
    */
-  private function sendQuery($sql, $exe) {
+  private function sendQuery($sql, $exe, $return) {
     $stmt = $this->db_conn_handle->prepare($sql);
     $stmt->execute($exe);
-    $stmt->setFetchMode(PDO::FETCH_ASSOC);
-    return $stmt->fetchAll();
+    if ($return) {
+      $stmt->setFetchMode(PDO::FETCH_ASSOC);
+      return $stmt->fetchAll();
+    } else return null;
   }
 
   /**
@@ -27,11 +29,12 @@ class Db {
     $f = strtolower(explode(' ', $sql, 2)[0]);
     $exe = [];
     if ($f == 'select' || $f == 'update' || $f == 'insert') {
+      $f = ($f == 'select');  // if SELECT return FETCH
       if (isset($arg[1])) {
         if (is_array($arg[1])) $exe = $arg[1];
         else foreach($arg as $a) array_push($exe, $a);
       }
-      return $this->sendQuery($sql, $exe);
+      return $this->sendQuery($sql, $exe, $f);
     }
     return null;
   }
@@ -54,9 +57,13 @@ class Db {
     unset($iniArr);
     try {
       $this->db_conn_handle = new PDO(
-        "mysql:host=" . $ini['hostname'] . ";dbname=" . $ini['database'],
+        "mysql:host=" . $ini['hostname'] . ";dbname=" . $ini['database'] . ";charset=utf8mb4",
         $ini['username'],
         $ini['password']
+      );
+      $this->db_conn_handle->setAttribute(
+        PDO::ATTR_EMULATE_PREPARES,
+        FALSE
       );
       $this->db_conn_handle->setAttribute(
         PDO::ATTR_ERRMODE,

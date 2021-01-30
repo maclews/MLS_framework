@@ -12,6 +12,11 @@ class Core {
   private $HTML_JQUERY;
   private $HTML_BOOTSTRAP_JS;
   private $HTML_JS;
+  private $HTML_EXT_JS;
+  private $HTML_META_TAGS;
+  private $HTML_LINK_TAGS;
+  private $HTML_META_TAGS_LIST;
+  private $HTML_INJECTIONS;
 
   /**
    * --------------------------------------------------------------------------------
@@ -41,7 +46,10 @@ class Core {
   }
 
   private function prepareSettings() {
-    $this->settings = parse_ini_file(ROOT . 'cfg.ini');
+    $settings_ini = parse_ini_file(ROOT . 'cfg.ini', true);
+    if (isset($settings_ini[$_SERVER['HTTP_HOST']])) {
+      $this->settings = $settings_ini[$_SERVER['HTTP_HOST']];
+    } else throw new Exception('Undefined SETTINGS - check cfg.ini');
   }
 
   private function prepareTitle() {
@@ -101,6 +109,7 @@ class Core {
   }
 
   public function register_ext_css($href, $integrity, $crossorigin = 'anonymous') {
+    if ((bool)$crossorigin == false) $crossorigin = 'anonymous';
     array_push($this->HTML_EXT_CSS, [
       'href' => $href,
       'integrity' => $integrity,
@@ -122,12 +131,18 @@ class Core {
     }
   }
 
-  public function set_jquery($array) {
-    $this->HTML_JQUERY = $array;
+  public function set_jquery($href, $integrity, $crossorigin) {
+    if ($this->HTML_JQUERY) return;
+    $this->HTML_JQUERY = true;
+    if ((bool)$crossorigin == false) $crossorigin = 'anonymous';
+    $this->register_ext_js($href,$integrity,$crossorigin);
   }
 
-  public function set_bootstrap_js($array) {
-    $this->HTML_BOOTSTRAP_JS = $array;
+  public function set_bootstrap_js($href, $integrity, $crossorigin) {
+    if ($this->HTML_BOOTSTRAP_JS) return;
+    $this->HTML_BOOTSTRAP_JS = true;
+    if ((bool)$crossorigin == false) $crossorigin = 'anonymous';
+    $this->register_ext_js($href,$integrity,$crossorigin);
   }
 
   public function register_js($name) {
@@ -135,11 +150,29 @@ class Core {
     // TODO: add to error log 'JS already registered'
   }
 
-  public function compileHTML($baseFileName) {
+  public function register_ext_js($href, $integrity, $crossorigin = 'anonymous') {
+    if ((bool)$crossorigin == false) $crossorigin = 'anonymous';
+    array_push($this->HTML_EXT_JS, [
+      'href' => $href,
+      'integrity' => $integrity,
+      'crossorigin' => $crossorigin
+    ]);
+  }
+
+  public function register_meta_tag($name, $content) {
+    if (array_search($name, $this->HTML_META_TAGS_LIST)) return;
+    else array_push($this->HTML_META_TAGS, [$name,$content]);
+  }
+
+  public function register_link_tag($rel, $href) {
+    if ($rel != 'stylesheet') array_push($this->HTML_LINK_TAGS, [$rel, $href]);
+  }
+
+  public function compileHTML() {
     if ($this->htmlOn) throw new Exception('HTML compiler already running');  // prevent another execution
     else $this->htmlOn = true;
 
-    $_HTML = new Html($baseFileName);
+    $_HTML = new Html($this->settings['template']);
 
     $_HTML->enqueueHeadTag('meta','charset','utf-8');
     $_HTML->enqueueHeadTag('meta','name','viewport','content','width=device-width, initial-scale=1, shrink-to-fit=no');
@@ -162,15 +195,19 @@ class Core {
         $_HTML->putModuleContent($content);
       }
     }
-    
+
+    /** PROCESS PRE-QUEUE ARRAYS AFTER THIS LINE */
+
+    foreach ($this->HTML_META_TAGS as $meta) $_HTML->enqueueHeadTag('meta','name',$meta[0],'content',$meta[1]);
+    foreach ($this->HTML_LINK_TAGS as $link) $_HTML->enqueueHeadTag('link','rel',$link[0],'href',$link[1]);
     foreach ($this->HTML_CSS as $css) $_HTML->enqueueHeadTag('link','rel','stylesheet','href',STATIC_URL.'css/'.$css);
     foreach ($this->HTML_EXT_CSS as $css) $_HTML->enqueueHeadTag('link','rel','stylesheet','href',$css['href'],'integrity',$css['integrity'],'crossorigin',$css['crossorigin']); 
     foreach ($this->HTML_FONTS as $font) $_HTML->addGoogleFont($font['name'],$font['weights'],$font['italics']);
-    $_HTML->enqueueBodyEndTag('script','src',$this->HTML_JQUERY['src'],'integrity',$this->HTML_JQUERY['integrity'],'crossorigin',$this->HTML_JQUERY['crossorigin']);
-    $_HTML->enqueueBodyEndTag('script','src',$this->HTML_BOOTSTRAP_JS['src'],'integrity',$this->HTML_BOOTSTRAP_JS['integrity'],'crossorigin',$this->HTML_BOOTSTRAP_JS['crossorigin']);
+    foreach ($this->HTML_EXT_JS as $ejs) $_HTML->enqueueBodyEndTag('script','src',$ejs['href'],'integrity',$ejs['integrity'],'crossorigin',$ejs['crossorigin']);
     foreach ($this->HTML_JS as $js) $_HTML->enqueueBodyEndTag('script','async','async','src',STATIC_URL.'js/'.$js);
+    foreach ($this->HTML_INJECTIONS as $inject) $_HTML->insertIntoById($inject);
 
-    $_HTML->loadMenu();
+    if (isset($this->settings['nav_menu_id']) && isset($this->settings['nav_menu_file'])) $_HTML->loadMenu($this->settings['nav_menu_id'], $this->settings['nav_menu_file']);
 
     unset($_HTML);
   }
@@ -179,6 +216,20 @@ class Core {
     $title = $this->appTitle;
     if ($this->modTitle != null) $title = $this->modTitle . " &bull; " . $title;
     return $title;
+  }
+
+  public function getAppName() : string {
+    return $this->appTitle;
+  }
+
+  public function injectTag($parent, $name, $attrArr, $content = null) {
+    $temp = [];
+    array_push($temp, $parent);
+    array_push($temp, $name);
+    if ($content === null) $content = '';
+    array_push($temp, $content);
+    foreach ($attrArr as $attr) array_push($temp, $attr);
+    array_push($this->HTML_INJECTIONS, $temp);
   }
 
   /**
@@ -195,7 +246,14 @@ class Core {
     $this->HTML_CSS = [];
     $this->HTML_EXT_CSS = [];
     $this->HTML_FONTS = [];
+    $this->HTML_JQUERY = false;
+    $this->HTML_BOOTSTRAP_JS = false;
     $this->HTML_JS = [];
+    $this->HTML_EXT_JS = [];
+    $this->HTML_META_TAGS = [];
+    $this->HTML_LINK_TAGS = [];
+    $this->HTML_META_TAGS_LIST = [];
+    $this->HTML_INJECTIONS = [];
     $this->db_handle = new Db();
   }
 
@@ -217,7 +275,12 @@ class Core {
       $this->HTML_FONTS,
       $this->HTML_JQUERY,
       $this->HTML_BOOTSTRAP_JS,
-      $this->HTML_JS
+      $this->HTML_JS,
+      $this->HTML_EXT_JS,
+      $this->HTML_META_TAGS,
+      $this->HTML_LINK_TAGS,
+      $this->HTML_META_TAGS_LIST,
+      $this->HTML_INJECTIONS
     );
   }
 }

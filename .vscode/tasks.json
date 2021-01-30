@@ -1,0 +1,21 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Compile mls.sass",
+      "type": "shell",
+      "command": "sass mls.scss root/static/css/mls.min.css --style=compressed",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Compile sos.sass",
+      "type": "shell",
+      "command": "sass sos.scss root/static/css/sos.min.css --style=compressed",
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}
